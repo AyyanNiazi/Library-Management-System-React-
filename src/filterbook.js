@@ -13,17 +13,23 @@ import RenderBooks from './renderBooks'
 
 class FilterBooks extends React.Component{
     render() {
+        //  const books = this.props.books.filter( (e) =>{
+        //     return e.map((val)=>{
+        //         return val.volumeInfo.title.indexOf(this.props.searchFilter) !== -1
+        //     })
+        // } )
+
         
-        // console.log('props',books)
+        console.log('props',this.props.books)
         return (
             <div>
                 <ul>
-                    {this.props.books.map((val, i) => {
-                        return val.map((val)=>{
+                    {this.props.books.map((v, i) => {
+                        return v.map((val,i)=>{
                             return (
-                                <div>
+                                <div key={i} >
                                     <RenderBooks
-                                        // images={val.volumeInfo.imageLinks.thumbnail}
+                                        images={val.volumeInfo.imageLinks.thumbnail}
                                         title={val.volumeInfo.title}
                                         authors={val.volumeInfo.authors}
                                         publisher={val.volumeInfo.publisher}

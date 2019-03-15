@@ -1,8 +1,11 @@
 import * as React from 'react'
-// import * as mui from 'material-ui'
+//eslint-disable-next-line
+import * as mui from 'material-ui'
 import Divider from 'material-ui/Divider';
 import { List, ListItem } from 'material-ui/List';
 import ActionInfo from 'material-ui/svg-icons/action/info';
+import { Card } from 'material-ui';
+
 
 class WantToRead extends React.Component {
   constructor(props) {
@@ -10,10 +13,17 @@ class WantToRead extends React.Component {
     super(props);
     this.state = {
       selectValue: storageValue,
+      update: false,
+      open: false,
+      error: false,
     }
     console.log(storageValue, "const want")
   }
 
+  handleClose = () => {
+    this.setState({ open: false, error: false });
+    this.forceUpdate();
+  };
 
   currRead = (bookId) => {
     var counter = []
@@ -25,7 +35,9 @@ class WantToRead extends React.Component {
 
     // getarrayRead.push(filterArr[0]) 
     // localStorage.setItem('readState', JSON.stringify(getarrayRead)); 
-
+    this.setState({
+      update: true
+    })
     const getarrayReadState = undefined
     // alert('clicked')
     let getarray = JSON.parse(localStorage.getItem('wantState')) || [];
@@ -77,11 +89,16 @@ class WantToRead extends React.Component {
       localStorage.setItem('wantState', JSON.stringify(getarray));
       // yahan py agar same na hui id tu jay ga warna nahi
       console.log('running')      // return arr
+      this.setState({
+        open: true
+      })
     }
     else {
       console.log('enter already');
-      alert('You already Entered This Book In Current Read Shelf ')
-    }
+      this.setState({
+        error: true
+      })
+      }
   }
 
   read = (bookId) => {
@@ -147,29 +164,26 @@ class WantToRead extends React.Component {
       localStorage.setItem('readState', JSON.stringify(getarrayRead));
       localStorage.setItem('currState', JSON.stringify(getarray));
       // yahan py agar same na hui id tu jay ga warna nahi
+      this.setState({
+        open: true
+      })
       console.log('running')      // return arr
     }
     else {
       console.log('enter already');
-      alert('You already Entered This Book In Read Shelf ')
+      this.setState({
+        error: true
+      })
     }
   }
+
+  // Store Starting
 
   store = (bookId) => {
     var counter = []
     var key = bookId
-    // this.setState({
-    //     initial: key
-    // })
-    const getarrayReadState = undefined
-    // alert('clicked')
+
     let getarray = JSON.parse(localStorage.getItem('wantState')) || [];
-    // let getarrayWant = JSON.parse(localStorage.getItem('wantState')) || [];
-    // let getarrayReadState = JSON.parse(localStorage.getItem('readState'));
-    // var index = counter.inderOf(1);
-    // getarray = getarray.splice(i,0)
-    // const arr = []
-    // const id = Object.keys(getarray)
 
     const filterArr = getarray.filter((e) => {
       if (e.bookId === key) {
@@ -181,29 +195,42 @@ class WantToRead extends React.Component {
         f.bookId === element.bookId), 1)
 
     });
+    localStorage.setItem('wantState', JSON.stringify(getarray));        // return arr
+
+    this.setState({
+      open: true
+    })
 
   }
+
   render() {
     const { selectValue } = this.state
+    const actions = <mui.FlatButton
+      label="Ok"
+      primary={true}
+      onClick={this.handleClose}
+    />
     return (
       <div>
         {/* <h1>  Want To Read Books </h1> */}
 
         {selectValue ? <div>
-
+          <div class="alert alert-info" role="alert" style={{ textAlign: 'center', fontSize: '1.92em', fontWeight: '700', }} >
+          Available Books In Want To Read Book Shelf
+          </div>
           <ul> {selectValue.map((val, i) => {
             //    return val.map((val,i)=>{
             return (
               <div key={i}  >
                 <List style={{ float: 'left' }} >
-                  <ListItem > <img src={val.images} /> </ListItem>
+                  <ListItem > <img src={val.images} width='160' height='260' /> </ListItem>
                 </List>
                 <Divider />
                 <List  >
-                  <ListItem secondaryText="Book Image" value={1} secondaryText={val.title} primaryText="Title" rightIcon={<ActionInfo />} />
+                  <ListItem value={1} secondaryText={val.title} primaryText="Title" rightIcon={<ActionInfo />} />
                   <ListItem value={2} secondaryText={val.publisher} primaryText="Publisher" rightIcon={<ActionInfo />} />
                   <ListItem value={3} secondaryText={val.publishedDate} primaryText="Published date" rightIcon={<ActionInfo />} />
-                  <ListItem value={4} secondaryText={val.bookId} primaryText="Published date" rightIcon={<ActionInfo />} />
+                  <ListItem value={4} secondaryText={val.bookId} primaryText="Book Id" rightIcon={<ActionInfo />} />
                 </List>
                 <Divider />
                 <ListItem value={1}
@@ -218,7 +245,7 @@ class WantToRead extends React.Component {
                       primaryText="Read Shelf"
                       onClick={this.read.bind(this, val.bookId)} />, // yahan sy id bhej rahy onclick event k call hony par
                     <ListItem
-                      value={2}
+                      value={this.state.update}
                       primaryText="Store"
                       onClick={this.store.bind(this, val.bookId)} // yahan sy id bhej rahy onclick event k call hony par
                     />
@@ -228,17 +255,27 @@ class WantToRead extends React.Component {
                 <br />  <hr style={{ border: '1px solid black' }} />
               </div>
             )
-          })} </ul></div>
-          :
-          <h1> No Book Found In your Want to Read Shelf</h1>}
+          })}</ul>
+        </div> :
+          <div class="alert alert-danger" style={{ marginTop: '25vw', textAlign: 'center' }} role="alert">
+            <i class="fa fa-exclamation-triangle"></i> No Book Found In Want To Read Shelf
+        </div>}
 
-        {/* {selectValue.map((v,i)=>{
-          // return v.map((val,ind)=>{
-            return ( 
-            <li>  {v.title}  </li>
-            )
-          // })
-        })} */}
+        <mui.Dialog
+          actions={actions}
+          modal={false}
+          open={this.state.open}
+          onRequestClose={this.handleClose}>
+       <span style={{color: 'green'}} >    Your Book Succesfully Added In Selected Shelf</span>
+        </mui.Dialog>
+        <mui.Dialog
+          actions={actions}
+          modal={false}
+          open={this.state.error}
+          onRequestClose={this.handleClose}>
+          <span style={{color: 'red'}}>  <i class="fa fa-exclamation-circle"></i> Sorry error occur May be you already entered this book in selected shelf </span>
+        </mui.Dialog>
+
       </div>
     )
   }
